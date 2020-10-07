@@ -1,0 +1,3 @@
+wheel
+quasardb==3.9.4
+boto3>=1.9
