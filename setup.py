@@ -10,7 +10,7 @@ version = "3.9.4"
 
 setup(
     name = "qdb-cloudwatch",
-    packages = ["qdb_coudwatch"],
+    packages = ["qdb_cloudwatch"],
     entry_points = {
         "console_scripts": ['qdb-cloudwatch = qdb_cloudwatch.check:main']
         },

@@ -1,0 +1,68 @@
+#!/bin/expect -f
+
+set force_conservative 0  ;# set to 1 to force conservative mode even if
+			  ;# script wasn't run conservatively originally
+if {$force_conservative} {
+	set send_slow {1 .1}
+	proc send {ignore arg} {
+		sleep .1
+		exp_send -s -- $arg
+	}
+}
+
+# Accept first argument as the path to `qdb_license_gen`, or use default
+set prog [lindex $argv 0]
+if {$prog == ""} {
+    set prog "qdb_license_gen"
+}
+
+
+set timeout -1
+spawn $prog
+match_max 100000
+expect -exact "Product type (1 = Transient, 2 = RocksDB)? "
+send -- "2\r"
+expect -exact "2\r
+Company name? "
+send -- "QuasarDB\r"
+expect -exact "QuasarDB\r
+E-mail? "
+send -- "info@quasardb.net\r"
+expect -exact "info@quasardb.net\r
+Maximum memory, in GiB? "
+send -- "1024\r"
+expect -exact "1024\r
+Support until (YYYY-MM-DD, blank for no expiration)? "
+send -- "2022-01-01\r"
+expect -exact "2022-01-01\r
+Expires at (YYYY-MM-DD, blank for no expiration)? "
+send -- "2022-01-01\r"
+expect -exact "2022-01-01\r
+\r
+Entered license information: \r
+\r
+               Product: 2\r
+               Company: QuasarDB\r
+                E-mail: info@quasardb.net\r
+         Serial number: "
+
+# Serial key
+expect -re {[a-z0-9\-]+}
+
+# Current date
+expect -re {[0-9\-: ]+}
+
+expect -exact "\r
+         Support until: 2022-01-01 00:00:00\r
+       Expiration date: 2022-01-01 00:00:00\r
+\r
+Is the above correct \[y/n\]? "
+
+send -- "y\r"
+expect -exact "y\r
+\r
+Thank you.\r
+\r
+License file name? "
+send -- "license.key\r"
+expect eof
