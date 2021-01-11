@@ -34,6 +34,16 @@ def get_args():
         help='Namespace for metrics',
         default='QuasarDB')
 
+    parser.add_argument(
+        '--sts-role-arn',
+        dest='sts_role_arn',
+        help='Explicitly assume role')
+
+    parser.add_argument(
+        '--sts-external-id',
+        dest='sts_external_id',
+        help='Optional external id to provide with role')
+
     return parser.parse_args()
 
 def main():
@@ -42,4 +52,4 @@ def main():
                       cluster_public_key=args.cluster_public_key,
                       user_security_file=args.user_security_file)
 
-    push_stats(stats, args.namespace)
+    push_stats(stats, args)

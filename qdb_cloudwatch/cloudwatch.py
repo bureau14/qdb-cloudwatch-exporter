@@ -1,7 +1,24 @@
 import boto3
 
-def _get_client():
+def _get_sts_client(role_arn, external_id):
+    sts_client = boto3.client('sts')
+    assumed_role = sts_client.assume_role(RoleArn=role_arn,
+                                          RoleSessionName="cloudwatch",
+                                          ExternalId=external_id)
+    credentials=assumed_role['Credentials']
+    return boto3.client('cloudwatch',
+                        aws_access_key_id=credentials['AccessKeyId'],
+                        aws_secret_access_key=credentials['SecretAccessKey'],
+                        aws_session_token=credentials['SessionToken'])
+
+def _get_default_client():
     return boto3.client('cloudwatch')
+
+def _get_client(args):
+    if args.sts_role_arn is not None and args.sts_external_id is not None:
+        return _get_sts_client(args.sts_role_arn, args.sts_external_id)
+    else:
+        return _get_default_client()
 
 def _metric_suffix(s):
     return s.rsplit('.', 1)[1]
@@ -81,8 +98,8 @@ def _qdb_to_cloudwatch(stats):
 
 
 
-def push_stats(stats, namespace):
-    client = _get_client()
+def push_stats(stats, args):
+    client = _get_client(args)
     stats_ = _qdb_to_cloudwatch(stats)
 
 
@@ -90,7 +107,7 @@ def push_stats(stats, namespace):
     metrics = [stats_[i:i+metrics_per_req] for i in range(0, len(stats_), metrics_per_req)]
 
     for metric in metrics:
-        response = client.put_metric_data(Namespace=namespace,
+        response = client.put_metric_data(Namespace=args.namespace,
                                           MetricData=metric)
 
     print("Pushed {} metrics".format(len(stats_)))
