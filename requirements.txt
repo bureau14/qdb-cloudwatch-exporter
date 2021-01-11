@@ -1,3 +1,3 @@
 wheel
-quasardb==3.9.4
+quasardb==3.9.6
 boto3>=1.9
