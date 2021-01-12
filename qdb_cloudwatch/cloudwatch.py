@@ -45,7 +45,7 @@ def _coerce_metric(k, v):
     elif (sufx.endswith('count')):
         return ('Count', float(v))
     else:
-        print('unknown suffix: ', sufx, ', k: ', k, ', v: ', v)
+        print('unknown suffix: ', sufx, ', k: ', k)
         return ('None', float(v))
 
 
