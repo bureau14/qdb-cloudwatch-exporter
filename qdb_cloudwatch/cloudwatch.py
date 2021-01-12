@@ -40,6 +40,8 @@ def _coerce_metric(k, v):
         return ('Microseconds', float(v))
     elif (sufx == 'remaining_days'):
         return ('Seconds', float(v * 86400))
+    elif (sufx == 'retry_wait_seconds'):
+        return ('Seconds', float(v))
     elif (sufx.startswith('bytes') or sufx.endswith('bytes')):
         return ('Bytes', float(v))
     elif (sufx.endswith('count')):
