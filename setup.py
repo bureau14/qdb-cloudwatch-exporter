@@ -6,7 +6,7 @@ import re
 from setuptools import setup
 
 # Should equal quasardb api version
-version = "3.9.6"
+version = "3.9.7"
 
 setup(
     name = "qdb-cloudwatch",
@@ -19,5 +19,5 @@ setup(
 
     install_requires=[
         "boto3>=1.9",
-        "quasardb == 3.9.6"],
+        "quasardb == 3.9.7"],
     )
