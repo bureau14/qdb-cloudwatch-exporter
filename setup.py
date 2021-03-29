@@ -18,6 +18,6 @@ setup(
     description = "Export QuasarDB statistics to AWS Cloudwatch",
 
     install_requires=[
-        "boto3>=1.9",
+        "boto3",
         "quasardb == 3.9.7"],
     )
