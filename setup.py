@@ -19,5 +19,5 @@ setup(
 
     install_requires=[
         "boto3",
-        "quasardb == 3.9.8"],
+        "quasardb"],
     )
