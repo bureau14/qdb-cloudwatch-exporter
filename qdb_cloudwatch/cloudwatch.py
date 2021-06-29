@@ -36,8 +36,11 @@ def _coerce_metric(k, v):
     if sufx == 'total_ns':
         return ('Microseconds', float(v) / 1000)
     elif (sufx == 'duration_us' or
-        sufx == 'time_us'):
+          sufx == 'time_us'):
         return ('Microseconds', float(v))
+    elif (sufx == 'duration_ms' or
+          sufx == 'time_ms'):
+        return ('Milliseconds', float(v))
     elif (sufx == 'remaining_days'):
         return ('Seconds', float(v * 86400))
     elif (sufx == 'retry_wait_seconds'):
