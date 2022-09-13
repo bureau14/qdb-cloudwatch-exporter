@@ -1,2 +1,2 @@
-quasardb
+quasardb==3.13.5.post1
 boto3>=1.9
