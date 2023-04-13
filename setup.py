@@ -6,7 +6,7 @@ import re
 from setuptools import setup
 
 # Should equal quasardb api version
-version = "3.15.1.post1"
+version = "3.13.6.post1"
 
 setup(
     name = "qdb-cloudwatch",
