@@ -25,6 +25,7 @@ setup(
           "pandas": ["pandas"],
           "tests": [
               "pytest >= 6.2.5",
-              "pytest-runner >= 5.3.1"]
+              "pytest-runner >= 5.3.1",
+              "teamcity-messages >= 1.29"]
       }
     )
