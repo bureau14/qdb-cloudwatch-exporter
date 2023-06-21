@@ -20,4 +20,11 @@ setup(
     install_requires=[
         "boto3>=1.9",
         "quasardb"],
+
+      extras_require={
+          "pandas": ["pandas"],
+          "tests": [
+              "pytest >= 6.2.5",
+              "pytest-runner >= 5.3.1"]
+      }
     )
