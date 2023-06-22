@@ -8,8 +8,8 @@ def _parse_list(x):
     Parses a comma-separated string into a list.
     """
 
-    if x is None:
-        return x
+    if x is None or x.strip() == "":
+        return None
 
     return [token.strip() for token in x.split(',')]
 
