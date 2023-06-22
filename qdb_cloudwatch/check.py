@@ -1,6 +1,7 @@
 import json
 import random
 
+import copy
 import quasardb
 import quasardb.stats as qdbst
 
@@ -72,3 +73,43 @@ def get_stats(*args, **kwargs):
         for endpoint, result in _check_node_writable(conn).items():
             stats[endpoint]['cumulative']['node.writable'] = result
         return stats
+
+def _do_filter_metrics(metrics, fn):
+    return {key: metrics[key] for key in metrics if fn(key) == True}
+
+def _do_filter(stats, fn):
+    """
+    Performs actual filtering of stats, keeping only those where fn(name) equals True
+    """
+
+    for node_id in stats:
+        for group_id in stats[node_id]:
+
+            if group_id == 'cumulative':
+                stats[node_id][group_id] = _do_filter_metrics(stats[node_id][group_id], fn)
+            elif group_id == 'by_uid':
+                for uid in stats[node_id][group_id]:
+                    stats[node_id][group_id][uid] = _do_filter_metrics(stats[node_id][group_id][uid], fn)
+            else:
+                raise RuntimeError("Internal error: unrecognized stats group id: {}".format(group_id))
+
+    return stats
+
+def filter_stats(stats, include=None, exclude=None):
+
+    stats_ = copy.deepcopy(stats)
+
+    if include is not None:
+
+        # Actual filtering function, returns `true` if any of the `include` patterns is found
+        # in the metric name
+        def _filter_include(metric_name):
+            for x in include:
+                if x in metric_name:
+                    return True
+
+            return False
+
+        stats_ = _do_filter(stats_, _filter_include)
+
+    return stats_

@@ -7,6 +7,7 @@ import datetime
 import pprint
 from functools import partial
 
+from qdb_cloudwatch.check import get_stats
 import quasardb
 
 pp = pprint.PrettyPrinter()
@@ -77,3 +78,10 @@ def qdbd_direct_connection(request):
             user_name=settings.get("security").get("user_name"),
             user_private_key=settings.get("security").get("user_private_key"),
             cluster_public_key=settings.get("security").get("cluster_public_key"))
+
+
+@pytest.fixture(scope="module")
+def stats(qdbd_settings):
+    return get_stats(qdbd_settings.get("uri"),
+                     cluster_public_key=qdbd_settings.get("security").get("cluster_public_key_file"),
+                     user_security_file=qdbd_settings.get("security").get("user_private_key_file"))
