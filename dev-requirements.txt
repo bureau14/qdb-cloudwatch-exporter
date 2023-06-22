@@ -1,0 +1,4 @@
+wheel == 0.40.0
+pytest == 7.3.2
+pytest-runner == 6.0.0
+teamcity-messages == 1.32
