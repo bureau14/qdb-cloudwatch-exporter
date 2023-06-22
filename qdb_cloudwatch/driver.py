@@ -1,7 +1,17 @@
 import argparse
 
-from .check import get_stats
+from .check import get_stats, filter_stats
 from .cloudwatch import push_stats
+
+def _parse_list(x):
+    """
+    Parses a comma-separated string into a list.
+    """
+
+    if x is None:
+        return x
+
+    return [token.strip() for token in x.split(',')]
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -34,12 +44,35 @@ def get_args():
         help='Namespace for metrics',
         default='QuasarDB')
 
-    return parser.parse_args()
+    parser.add_argument(
+        '--filter-include',
+        dest='filter_include',
+        help='Optional comma-separated list of string patterns to use to filter metrics for. Only metrics that match at least one of the patterns will be reported.')
+
+    parser.add_argument(
+        '--filter-exclude',
+        dest='filter_exclude',
+        help='Optional comma-separated list of string patterns to use to filter metrics for. Only metrics that contain none of the patterns will be reported.')
+
+    ret = parser.parse_args()
+
+    ret.filter_include = _parse_list(ret.filter_include)
+    ret.filter_exclude = _parse_list(ret.filter_exclude)
+
+    if ret.filter_include is not None:
+        print("Using include filters: ", ret.filter_include)
+
+    if ret.filter_exclude is not None:
+        print("Using exclude filters: ", ret.filter_exclude)
+
+    return ret
 
 def main():
     args = get_args()
     stats = get_stats(args.cluster_uri,
                       cluster_public_key=args.cluster_public_key,
                       user_security_file=args.user_security_file)
+
+    stats = filter_stats(stats, include=args.filter_include, exclude=args.filter_exclude)
 
     push_stats(stats, args.namespace)
