@@ -112,4 +112,19 @@ def filter_stats(stats, include=None, exclude=None):
 
         stats_ = _do_filter(stats_, _filter_include)
 
+    if exclude is not None:
+        # Actual filtering function, returns `true` if any of the `include` patterns is found
+        # in the metric name
+        def _filter_exclude(metric_name):
+            for x in exclude:
+                if x in metric_name:
+                    return False
+
+            return True
+
+        stats_ = _do_filter(stats_, _filter_exclude)
+
+
+
+
     return stats_
