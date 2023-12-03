@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<build-type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="1d309fd2-3f16-4b23-94e3-b77d3e0c64d4" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2021.1/project-config.xsd">
+  <name>Python 3.7</name>
+  <description />
+  <settings ref="Api_CloudwatchExporter_Linux_Build">
+    <parameters>
+      <param name="PYTHON_VERSION" value="3.7" spec="text description='Python version to use. Will be used as the base docker image, e.g. we will run the build inside the `python:%PYTHON_VERSION%` docker image.' label='Python version' validationMode='not_empty' display='normal'" />
+    </parameters>
+    <build-runners />
+    <vcs-settings />
+    <requirements />
+    <build-triggers />
+    <build-extensions>
+      <extension id="DockerSupport" type="DockerSupport">
+        <parameters>
+          <param name="login2registry" value="PROJECT_EXT_11" />
+          <param name="loginCheckbox" value="on" />
+        </parameters>
+      </extension>
+    </build-extensions>
+    <artifact-dependencies>
+      <dependency id="ARTIFACT_DEPENDENCY_150" sourceBuildTypeId="Api_Python_Release_Linux_X8664Core2_Python37" cleanDestination="false">
+        <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
+        <artifact sourcePath="quasardb-*manylinux*.whl =&gt; ." />
+      </dependency>
+    </artifact-dependencies>
+    <dependencies>
+      <depend-on sourceBuildTypeId="Api_Python_Release_Linux_X8664Core2_Python37">
+        <options>
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
+        </options>
+      </depend-on>
+    </dependencies>
+    <cleanup />
+  </settings>
+</build-type>
+

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" parent-id="Api" uuid="64fe98aa-63f9-4d0f-a2dd-1337a88049e9" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2021.1/project-config.xsd">
+  <name>Cloudwatch Exporter</name>
+  <description>Exporter of QuasarDB metrics to AWS CloudWatch</description>
+  <parameters>
+    <param name="env.CMAKE_BUILD_TYPE" value="Release" />
+  </parameters>
+  <project-extensions>
+    <extension id="PROJECT_EXT_27" type="versionedSettings">
+      <parameters>
+        <param name="buildSettings" value="PREFER_CURRENT" />
+        <param name="credentialsStorageType" value="credentialsJSON" />
+        <param name="enabled" value="true" />
+        <param name="ignoreChangesInDependenciesAndVcsSettings" value="false" />
+        <param name="rootId" value="Api_CloudwatchExporter_VcsSettings" />
+        <param name="showChanges" value="true" />
+      </parameters>
+    </extension>
+  </project-extensions>
+  <cleanup />
+</project>
+

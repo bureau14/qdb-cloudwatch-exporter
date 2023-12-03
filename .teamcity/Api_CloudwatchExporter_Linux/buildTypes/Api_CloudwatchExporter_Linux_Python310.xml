@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<build-type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="afa82715-15ea-4186-bcf4-6ec414c40d2c" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2021.1/project-config.xsd">
+  <name>Python 3.10</name>
+  <description />
+  <settings ref="Api_CloudwatchExporter_Linux_Build">
+    <parameters>
+      <param name="PYTHON_VERSION" value="3.10" />
+    </parameters>
+    <build-runners />
+    <vcs-settings />
+    <requirements />
+    <build-triggers />
+    <build-extensions>
+      <extension id="DockerSupport" type="DockerSupport">
+        <parameters>
+          <param name="login2registry" value="PROJECT_EXT_11" />
+          <param name="loginCheckbox" value="on" />
+        </parameters>
+      </extension>
+    </build-extensions>
+    <artifact-dependencies>
+      <dependency id="ARTIFACT_DEPENDENCY_126" sourceBuildTypeId="Api_Python_Release_Linux_Python310" cleanDestination="false">
+        <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
+        <artifact sourcePath="quasardb-*manylinux*.whl =&gt; ." />
+      </dependency>
+    </artifact-dependencies>
+    <dependencies>
+      <depend-on sourceBuildTypeId="Api_Python_Release_Linux_Python310">
+        <options>
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
+        </options>
+      </depend-on>
+    </dependencies>
+    <cleanup />
+  </settings>
+</build-type>
+

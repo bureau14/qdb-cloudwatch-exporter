@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="a981b134-6ed5-455b-9828-bc974dac7ce8" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2021.1/project-config.xsd">
+  <name>Build</name>
+  <settings>
+    <options>
+      <option name="artifactRules" value="dist/qdb_cloudwatch-*.whl" />
+      <option name="executionTimeoutMin" value="20" />
+      <option name="publishArtifactCondition" value="SUCCESSFUL" />
+    </options>
+    <parameters>
+      <param name="PYTHON_VERSION" value="" spec="text description='Python version to use. Will be used as the base docker image, e.g. we will run the build inside the `python:%PYTHON_VERSION%` docker image.' label='Python version' validationMode='not_empty' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner id="RUNNER_5" name="Start services" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="bash" />
+          <param name="command.parameters" value="scripts/tests/setup/start-services.sh" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_12" name="Run tests" type="simpleRunner">
+        <parameters>
+          <param name="plugin.docker.imageId" value="python:%PYTHON_VERSION%" />
+          <param name="plugin.docker.run.parameters" value="--network=host" />
+          <param name="script.content"><![CDATA[python3 -m pip install --upgrade setuptools wheel pip
+python3 -m pip install ./quasardb-*.whl
+python3 -m pip install -r requirements.txt
+python3 -m pip install -r dev-requirements.txt
+python3 -m pytest]]></param>
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_297" name="Build wheel" type="simpleRunner">
+        <parameters>
+          <param name="plugin.docker.imageId" value="python:%PYTHON_VERSION%" />
+          <param name="plugin.docker.imagePlatform" value="linux" />
+          <param name="script.content"><![CDATA[python3 -m pip install --upgrade setuptools wheel pip
+python3 -m pip install ./quasardb-*.whl
+python3 -m pip install -r requirements.txt
+python3 setup.py bdist_wheel]]></param>
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_10" name="Stop services" type="simpleRunner">
+        <parameters>
+          <param name="command.executable" value="bash" />
+          <param name="command.parameters" value="scripts/tests/setup/stop-services.sh" />
+          <param name="teamcity.step.mode" value="execute_always" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <vcs-settings>
+      <vcs-entry-ref root-id="Api_CloudwatchExporter_QdbCloudwatchExporter" />
+    </vcs-settings>
+    <requirements>
+      <equals id="RQ_15" name="teamcity.agent.jvm.os.name" value="Linux" />
+      <equals id="RQ_21" name="teamcity.agent.jvm.os.arch" value="amd64" />
+    </requirements>
+    <build-triggers />
+    <build-extensions>
+      <extension id="DockerSupport" type="DockerSupport">
+        <parameters>
+          <param name="login2registry" value="PROJECT_EXT_39" />
+          <param name="loginCheckbox" value="on" />
+        </parameters>
+      </extension>
+    </build-extensions>
+    <artifact-dependencies>
+      <dependency id="ARTIFACT_DEPENDENCY_10" sourceBuildTypeId="Quasardb_Artifacts_Release_Linux_X8664Core2_Default" cleanDestination="false">
+        <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
+        <artifact sourcePath="*-linux-64bit-core2-c-api.tar.gz!**/*=&gt;qdb&#xD;&#xA;*-linux-64bit-core2-utils.tar.gz!**/*=&gt;qdb&#xD;&#xA;*-linux-64bit-core2-server.tar.gz!**/*=&gt;qdb" />
+      </dependency>
+    </artifact-dependencies>
+    <dependencies>
+      <depend-on sourceBuildTypeId="Quasardb_Artifacts_Release_Linux_X8664Core2_Default">
+        <options>
+          <option name="take-started-build-with-same-revisions" value="true" />
+          <option name="take-successful-builds-only" value="true" />
+        </options>
+      </depend-on>
+    </dependencies>
+    <cleanup />
+  </settings>
+</template>
+
