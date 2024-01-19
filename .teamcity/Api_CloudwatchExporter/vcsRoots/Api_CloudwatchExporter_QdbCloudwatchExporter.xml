@@ -6,8 +6,10 @@
   <param name="authMethod" value="TEAMCITY_SSH_KEY" />
   <param name="branch" value="refs/heads/master" />
   <param name="ignoreKnownHosts" value="true" />
+  <param name="reportTagRevisions" value="true" />
   <param name="submoduleCheckout" value="CHECKOUT" />
-  <param name="teamcity:branchSpec" value="+:refs/heads/*" />
+  <param name="teamcity:branchSpec"><![CDATA[+:refs/heads/*
++:refs/tags/*]]></param>
   <param name="teamcitySshKey" value="teamcity@alcor.quasardb.net" />
   <param name="url" value="git@github.com:bureau14/qdb-cloudwatch-exporter.git" />
   <param name="useAlternates" value="AUTO" />
