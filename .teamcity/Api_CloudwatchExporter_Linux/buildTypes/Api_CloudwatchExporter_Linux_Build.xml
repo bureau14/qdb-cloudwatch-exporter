@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="a981b134-6ed5-455b-9828-bc974dac7ce8" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2021.1/project-config.xsd">
+<template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="a981b134-6ed5-455b-9828-bc974dac7ce8" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2025.3/project-config.xsd">
   <name>Build</name>
   <settings>
     <options>
@@ -58,7 +58,6 @@ python3 setup.py bdist_wheel]]></param>
       <equals id="RQ_15" name="teamcity.agent.jvm.os.name" value="Linux" />
       <equals id="RQ_21" name="teamcity.agent.jvm.os.arch" value="amd64" />
     </requirements>
-    <build-triggers />
     <build-extensions>
       <extension id="DockerSupport" type="DockerSupport">
         <parameters>
@@ -70,7 +69,7 @@ python3 setup.py bdist_wheel]]></param>
     <artifact-dependencies>
       <dependency id="ARTIFACT_DEPENDENCY_10" sourceBuildTypeId="Quasardb_Artifacts_Release_Linux_X8664Core2_Composite" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="*-linux-64bit-core2-c-api.tar.gz!**/*=&gt;qdb&#xD;&#xA;*-linux-64bit-core2-utils.tar.gz!**/*=&gt;qdb&#xD;&#xA;*-linux-64bit-core2-server.tar.gz!**/*=&gt;qdb" />
+        <artifact sourcePath="*-linux-64bit-core2-c-api.tar.zst!**/*=&gt;qdb&#xD;&#xA;*-linux-64bit-core2-utils.tar.zst!**/*=&gt;qdb&#xD;&#xA;*-linux-64bit-core2-server.tar.zst!**/*=&gt;qdb" />
       </dependency>
     </artifact-dependencies>
     <dependencies>
@@ -81,7 +80,6 @@ python3 setup.py bdist_wheel]]></param>
         </options>
       </depend-on>
     </dependencies>
-    <cleanup />
   </settings>
 </template>
 
