@@ -75,7 +75,7 @@ def get_stats(*args, **kwargs):
         for endpoint, result in _check_node_writable(conn).items():
             stats[endpoint]["cumulative"]["node.writable"] = {
                 "value": result,
-                "type": qdbst.Type.ACCUMULATOR,
+                "type": qdbst.Type.GAUGE,
                 "unit": qdbst.Unit.NONE,
             }
         return stats

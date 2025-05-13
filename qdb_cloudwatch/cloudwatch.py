@@ -24,7 +24,7 @@ def _coerce_metric(k, v):
         return None
 
     if v["unit"] == Unit.NANOSECONDS:
-        v["unit"] = Unit.Milliseconds
+        v["unit"] = Unit.MICROSECONDS
         v["value"] /= 1000
 
     return (_stat_unit_to_cloudwatch_unit.get(v["unit"], "None"), float(v["value"]))
