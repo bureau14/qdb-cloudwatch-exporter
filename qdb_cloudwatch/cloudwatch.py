@@ -1,12 +1,20 @@
 import boto3
+from quasardb.stats import Unit
+
+_stat_unit_to_cloudwatch_unit = {
+    Unit.NONE: "None",
+    Unit.COUNT: "Count",
+    Unit.BYTES: "Bytes",
+    Unit.EPOCH: "None",
+    Unit.NANOSECONDS: "None",
+    Unit.MICROSECONDS: "Microseconds",
+    Unit.MILLISECONDS: "Milliseconds",
+    Unit.SECONDS: "Seconds",
+}
 
 
 def _get_client():
     return boto3.client("cloudwatch")
-
-
-def _metric_suffix(s):
-    return s.rsplit(".", 1)[1]
 
 
 def _coerce_metric(k, v):
@@ -14,23 +22,12 @@ def _coerce_metric(k, v):
         # We don't expose CPU metrics through Cloudwatch, as this is already collected
         # by the regular metrics.
         return None
-    elif k == "license.memory":
-        return ("Bytes", float(v))
 
-    sufx = _metric_suffix(k)
-    if sufx == "total_ns":
-        return ("Microseconds", float(v) / 1000)
-    elif sufx == "duration_us" or sufx == "time_us":
-        return ("Microseconds", float(v))
-    elif sufx == "remaining_days":
-        return ("Seconds", float(v * 86400))
-    elif sufx.startswith("bytes") or sufx.endswith("bytes"):
-        return ("Bytes", float(v))
-    elif sufx.endswith("count"):
-        return ("Count", float(v))
-    else:
-        print("unknown suffix: ", sufx, ", k: ", k, ", v: ", v)
-        return ("None", float(v))
+    if v["unit"] == Unit.NANOSECONDS:
+        v["unit"] = Unit.MICROSECONDS
+        v["value"] /= 1000
+
+    return (_stat_unit_to_cloudwatch_unit.get(v["unit"], "None"), float(v["value"]))
 
 
 def _to_metric(k, v):
@@ -40,6 +37,7 @@ def _to_metric(k, v):
             (u, v_) = x
             return {"MetricName": k, "Value": v_, "Unit": u}
     except:
+        print(f"The key '{k}' cannot be sent")
         return None
 
 
@@ -57,19 +55,15 @@ def _qdb_to_cloudwatch(stats):
                 {"Name": "UserId", "Value": str(user_id)},
                 {"Name": "NodeId", "Value": str(node_id)},
             ]
-
             for k, v in xs_.items():
                 m = _to_metric(k, v)
-
                 if m:
                     m["Dimensions"] = dims
                     ret.append(m)
 
         dims = [{"Name": "NodeId", "Value": str(node_id)}]
-
         for k, v in xs["cumulative"].items():
             m = _to_metric(k, v)
-
             if m:
                 m["Dimensions"] = dims
                 ret.append(m)
