@@ -10,7 +10,7 @@ version = "3.15.0.dev0"
 setup(
     name="qdb-cloudwatch",
     packages=["qdb_cloudwatch"],
-    entry_points={"console_scripts": ["qdb-cloudwatch = qdb_cloudwatch.check:main"]},
+    entry_points={"console_scripts": ["qdb-cloudwatch = qdb_cloudwatch.driver:main"]},
     version=version,
     description="Export QuasarDB statistics to AWS Cloudwatch",
     install_requires=["boto3>=1.9", "quasardb"],
