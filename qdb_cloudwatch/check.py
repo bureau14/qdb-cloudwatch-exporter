@@ -1,6 +1,7 @@
 import copy
 import json
 import random
+import re
 
 import quasardb
 import quasardb.stats as qdbst
@@ -82,7 +83,7 @@ def get_stats(*args, **kwargs):
 
 
 def _do_filter_metrics(metrics, fn):
-    return {key: metrics[key] for key in metrics if fn(key) == True}
+    return {key: metrics[key] for key in metrics if fn(key)}
 
 
 def _do_filter(stats, fn):
@@ -92,7 +93,6 @@ def _do_filter(stats, fn):
 
     for node_id in stats:
         for group_id in stats[node_id]:
-
             if group_id == "cumulative":
                 stats[node_id][group_id] = _do_filter_metrics(
                     stats[node_id][group_id], fn
@@ -106,7 +106,6 @@ def _do_filter(stats, fn):
                 raise RuntimeError(
                     "Internal error: unrecognized stats group id: {}".format(group_id)
                 )
-
     return stats
 
 
@@ -114,26 +113,20 @@ def filter_stats(stats, include=None, exclude=None):
     stats_ = copy.deepcopy(stats)
 
     if include is not None:
-        # Actual filtering function, returns `true` if any of the `include` patterns is found
-        # in the metric name
+        # Returns `true` if any of the `include` patterns is found in the metric name.
         def _filter_include(metric_name):
-            for x in include:
-                if x in metric_name:
-                    return True
-
-            return False
+            return any(
+                pattern for pattern in include if re.search(pattern, metric_name)
+            )
 
         stats_ = _do_filter(stats_, _filter_include)
 
     if exclude is not None:
-        # Actual filtering function, returns `true` if any of the `include` patterns is found
-        # in the metric name
+        # Returns `false` if any of the `exclude` patterns is found in the metric name.
         def _filter_exclude(metric_name):
-            for x in exclude:
-                if x in metric_name:
-                    return False
-
-            return True
+            return not any(
+                pattern for pattern in exclude if re.search(pattern, metric_name)
+            )
 
         stats_ = _do_filter(stats_, _filter_exclude)
 
