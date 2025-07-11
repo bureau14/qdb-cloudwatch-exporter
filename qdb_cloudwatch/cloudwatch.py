@@ -81,6 +81,6 @@ def push_stats(stats, namespace):
     ]
 
     for metric in metrics:
-        response = client.put_metric_data(Namespace=namespace, MetricData=metric)
+        _ = client.put_metric_data(Namespace=namespace, MetricData=metric)
 
     print("Pushed {} metrics".format(len(stats_)))
