@@ -9,10 +9,10 @@ def _parse_list(x):
     Parses a comma-separated string into a list.
     """
 
-    if x is None or x.strip() == "":
+    if x is None or not x.strip():
         return None
 
-    return [token.strip() for token in x.split(",")]
+    return [token.strip() for token in x.split(",") if token.strip()]
 
 
 def get_args():
@@ -54,13 +54,13 @@ def get_args():
     parser.add_argument(
         "--filter-include",
         dest="filter_include",
-        help="Optional comma-separated list of string patterns to use to filter metrics for. Only metrics that match at least one of the patterns will be reported.",
+        help="Optional comma-separated list of regex patterns to filter metrics. Only metrics that match at least one of the patterns will be reported.",
     )
 
     parser.add_argument(
         "--filter-exclude",
         dest="filter_exclude",
-        help="Optional comma-separated list of string patterns to use to filter metrics for. Only metrics that contain none of the patterns will be reported.",
+        help="Optional comma-separated list of regex patterns to filter metrics. Only metrics that contain none of the patterns will be reported.",
     )
 
     ret = parser.parse_args()
@@ -87,5 +87,4 @@ def main():
     stats = filter_stats(
         stats, include=args.filter_include, exclude=args.filter_exclude
     )
-
     push_stats(stats, args.namespace)
