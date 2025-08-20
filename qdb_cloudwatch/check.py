@@ -1,11 +1,14 @@
 import copy
 import json
+import logging
 import random
 import re
 import uuid
 
 import quasardb
 import quasardb.stats as qdbst
+
+logger = logging.getLogger(__name__)
 
 
 def _slurp(x):
@@ -39,23 +42,23 @@ def _check_node_writable(conn):
     ret = {}
 
     for endpoint in conn.endpoints():
-        ret[endpoint] = 1
+        ret[endpoint] = 0  # pessimistic
         node = conn.node(endpoint)
         entry = node.integer(key)
 
         try:
             entry.put(value)
-            if entry.get() != value:
-                ret[endpoint] = 0
-        except quasardb.quasardb.Error:
-            ret[endpoint] = 0
+            if entry.get() == value:
+                ret[endpoint] = 1
+        except quasardb.quasardb.Error as e:
+            logger.error(f"[{endpoint}] Failed to put/get test entry '{key}': {e}")
         finally:
             try:
                 entry.remove()
             except quasardb.quasardb.AliasNotFoundError:
                 pass
-            except quasardb.quasardb.Error:
-                ret[endpoint] = 0
+            except quasardb.quasardb.Error as e:
+                logger.error(f"[{endpoint}] Failed to clean up test entry '{key}': {e}")
 
     return ret
 
