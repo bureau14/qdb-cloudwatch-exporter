@@ -1,7 +1,10 @@
 import argparse
+import logging
 
 from .check import filter_stats, get_stats
 from .cloudwatch import push_stats
+
+logger = logging.getLogger(__name__)
 
 
 def _parse_list(x):
@@ -69,10 +72,10 @@ def get_args():
     ret.filter_exclude = _parse_list(ret.filter_exclude)
 
     if ret.filter_include is not None:
-        print("Using include filters: ", ret.filter_include)
+        logger.info(f"Using include filters: {ret.filter_include}")
 
     if ret.filter_exclude is not None:
-        print("Using exclude filters: ", ret.filter_exclude)
+        logger.info(f"Using exclude filters: {ret.filter_exclude}")
 
     return ret
 

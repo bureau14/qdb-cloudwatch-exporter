@@ -1,5 +1,9 @@
+import logging
+
 import boto3
 from quasardb.stats import Unit
+
+logger = logging.getLogger(__name__)
 
 _stat_unit_to_cloudwatch_unit = {
     Unit.NONE: "None",
@@ -37,7 +41,7 @@ def _to_metric(k, v):
             (u, v_) = x
             return {"MetricName": k, "Value": v_, "Unit": u}
     except:
-        print(f"The key '{k}' cannot be sent")
+        logger.debug(f"The key '{k}' cannot be sent")
         return None
 
 
@@ -83,4 +87,4 @@ def push_stats(stats, namespace):
     for metric in metrics:
         _ = client.put_metric_data(Namespace=namespace, MetricData=metric)
 
-    print("Pushed {} metrics".format(len(stats_)))
+    logger.info(f"Pushed {len(stats_)} metrics")

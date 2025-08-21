@@ -1,10 +1,14 @@
 import copy
 import json
+import logging
 import random
 import re
+import uuid
 
 import quasardb
 import quasardb.stats as qdbst
+
+logger = logging.getLogger(__name__)
 
 
 def _slurp(x):
@@ -33,39 +37,28 @@ def get_qdb_conn(uri, cluster_public_key=None, user_security_file=None):
 
 
 def _check_node_writable(conn):
+    key = f"_qdb_write_check_{uuid.uuid4().hex}"  # almost zero chance of collision
     value = random.randint(-9223372036854775808, 9223372036854775807)
     ret = {}
+
     for endpoint in conn.endpoints():
-        ret[endpoint] = 1
+        ret[endpoint] = 0  # pessimistic
         node = conn.node(endpoint)
-        entry = node.integer("check_direct")
+        entry = node.integer(key)
 
-        # remove old entry
-        try:
-            entry.remove()
-        except:
-            pass
-
-        # put, get, compare, remove
         try:
             entry.put(value)
-            entry_value = entry.get()
-            if entry_value != value:
-                ret[endpoint] = 0
-                continue
-            entry.remove()
-        except Exception as e:
-            ret[endpoint] = 0
-            continue
-
-        # verify whether the entry was removed
-        try:
-            entry.get()
-        except quasardb.quasardb.AliasNotFoundError:
-            pass
-        except Exception as e:
-            ret[endpoint] = 0
-            continue
+            if entry.get() == value:
+                ret[endpoint] = 1
+        except quasardb.quasardb.Error as e:
+            logger.error(f"[{endpoint}] Failed to put/get test entry '{key}': {e}")
+        finally:
+            try:
+                entry.remove()
+            except quasardb.quasardb.AliasNotFoundError:
+                pass
+            except quasardb.quasardb.Error as e:
+                logger.error(f"[{endpoint}] Failed to clean up test entry '{key}': {e}")
 
     return ret
 
