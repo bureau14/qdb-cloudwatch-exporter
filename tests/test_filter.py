@@ -4,7 +4,7 @@ from qdb_cloudwatch.check import filter_stats
 
 
 def test_filter_single_include(stats):
-    stats_ = filter_stats(stats, include=["memory."])
+    stats_ = filter_stats(stats, include=[r"memory\."])
 
     assert stats_ != stats
 
@@ -18,12 +18,12 @@ def test_filter_single_include(stats):
 
 
 def test_filter_multiple_include(stats):
-    stats_ = filter_stats(stats, include=["memory.", "network."])
+    stats_ = filter_stats(stats, include=[r"memory\.", r"network\."])
 
     assert stats_ != stats
 
     # Also ensure that the result is actually different now that we also allow "network" to be returned
-    assert stats_ != filter_stats(stats, include=["memory."])
+    assert stats_ != filter_stats(stats, include=[r"memory\."])
 
     for node_id in stats_:
         for metric_name in stats_[node_id]["cumulative"]:
@@ -35,7 +35,7 @@ def test_filter_multiple_include(stats):
 
 
 def test_filter_single_exclude(stats):
-    stats_ = filter_stats(stats, exclude=["memory."])
+    stats_ = filter_stats(stats, exclude=[r"memory\."])
 
     assert stats_ != stats
 
@@ -49,14 +49,14 @@ def test_filter_single_exclude(stats):
 
 
 def test_filter_multiple_exclude(stats):
-    stats_ = filter_stats(stats, exclude=["memory.", "network."])
+    stats_ = filter_stats(stats, exclude=[r"memory\.", r"network\."])
 
     assert stats_ != stats
 
     # Also ensure that the result is actually different now that we also allow "network" to be returned
-    assert stats_ != filter_stats(stats, exclude=["memory."])
-    assert stats_ != filter_stats(stats, include=["memory."])
-    assert stats_ != filter_stats(stats, include=["memory.", "network."])
+    assert stats_ != filter_stats(stats, exclude=[r"memory\."])
+    assert stats_ != filter_stats(stats, include=[r"memory\."])
+    assert stats_ != filter_stats(stats, include=[r"memory\.", r"network\."])
 
     for node_id in stats_:
         for metric_name in stats_[node_id]["cumulative"]:
