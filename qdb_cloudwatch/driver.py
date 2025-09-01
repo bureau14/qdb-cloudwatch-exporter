@@ -1,5 +1,6 @@
 import argparse
 import logging
+import sys
 
 from .check import filter_stats, get_stats
 from .cloudwatch import push_stats
@@ -81,6 +82,8 @@ def get_args():
 
 
 def main():
+    logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+
     args = get_args()
     stats = get_stats(
         args.cluster_uri,
@@ -90,4 +93,5 @@ def main():
     stats = filter_stats(
         stats, include=args.filter_include, exclude=args.filter_exclude
     )
+
     push_stats(stats, args.namespace)
