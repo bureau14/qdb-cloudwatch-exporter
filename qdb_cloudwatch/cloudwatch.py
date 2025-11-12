@@ -18,6 +18,7 @@ _stat_unit_to_cloudwatch_unit = {
 
 
 def _get_client():
+    logger.info("Getting cloudwatch client")
     return boto3.client("cloudwatch")
 
 
@@ -84,6 +85,7 @@ def push_stats(stats, namespace):
         stats_[i : i + metrics_per_req] for i in range(0, len(stats_), metrics_per_req)
     ]
 
+    logger.info(f"Pushing {len(stats_)} metrics")
     for metric in metrics:
         _ = client.put_metric_data(Namespace=namespace, MetricData=metric)
 
