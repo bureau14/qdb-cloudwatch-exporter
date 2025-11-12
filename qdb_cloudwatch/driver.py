@@ -86,7 +86,7 @@ def main():
 
     args = get_args()
 
-    # Send first critical stats, getting all stats is expensive when cluster is busy.
+    # Send critical stats first, as getting all stats is expensive when cluster is busy.
     critical_stats = get_critical_stats(
         args.cluster_uri,
         cluster_public_key=args.cluster_public_key,
