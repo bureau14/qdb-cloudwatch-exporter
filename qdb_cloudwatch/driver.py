@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 
-from .check import filter_stats, get_stats
+from .check import filter_stats, get_all_stats, get_critical_stats
 from .cloudwatch import push_stats
 
 logger = logging.getLogger(__name__)
@@ -85,7 +85,16 @@ def main():
     logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
     args = get_args()
-    stats = get_stats(
+
+    # Send critical stats first, as getting all stats is expensive when cluster is busy.
+    critical_stats = get_critical_stats(
+        args.cluster_uri,
+        cluster_public_key=args.cluster_public_key,
+        user_security_file=args.user_security_file,
+    )
+    push_stats(critical_stats, args.namespace)
+
+    stats = get_all_stats(
         args.cluster_uri,
         cluster_public_key=args.cluster_public_key,
         user_security_file=args.user_security_file,
