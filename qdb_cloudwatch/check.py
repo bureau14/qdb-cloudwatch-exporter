@@ -84,6 +84,17 @@ def _check_node_writable(conn):
 
 
 def get_critical_stats(*args, **kwargs):
+    """
+    Return the minimal set of cluster health metrics required for alerting.
+
+    These metrics (i.e., `check.online` and `node.writable`) are the ones that
+    feed CloudWatch alarms and signal conditions that require immediate action.
+    By contrast, high-volume or informational metrics (cache usage, RocksDB
+    internals, etc.) are non-critical because they are (usually) not part of the
+    alerting path.
+
+    Future extensions may allow users to define their own critical metrics.
+    """
     logger.info("Getting critical stats")
     with get_qdb_conn(*args, **kwargs) as conn:
         ret = {endpoint: {"cumulative": {}} for endpoint in conn.endpoints()}
