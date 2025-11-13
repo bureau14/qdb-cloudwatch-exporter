@@ -23,6 +23,7 @@ def _parse_user_security_file(x):
 
 
 def get_qdb_conn(uri, cluster_public_key=None, user_security_file=None):
+    logger.info("Getting qdb connection")
     if cluster_public_key and user_security_file:
         user, private_key = _parse_user_security_file(user_security_file)
         public_key = _slurp(cluster_public_key)
@@ -36,7 +37,26 @@ def get_qdb_conn(uri, cluster_public_key=None, user_security_file=None):
         return quasardb.Cluster(uri)
 
 
+def _check_node_online(conn):
+    logger.info("Checking node online")
+    ret = {}
+
+    for endpoint in conn.endpoints():
+        ret[endpoint] = 0  # pessimistic
+        node = conn.node(endpoint)
+        entry = node.integer("$qdb.statistics.startup_epoch")  # entry always exists
+
+        try:
+            entry.get()
+            ret[endpoint] = 1
+        except quasardb.Error as e:
+            logger.error(f"[{endpoint}] Failed to read sample entry: {e}")
+
+    return ret
+
+
 def _check_node_writable(conn):
+    logger.info("Checking node writable")
     key = f"_qdb_write_check_{uuid.uuid4().hex}"  # almost zero chance of collision
     value = random.randint(-9223372036854775808, 9223372036854775807)
     ret = {}
@@ -50,29 +70,57 @@ def _check_node_writable(conn):
             entry.put(value)
             if entry.get() == value:
                 ret[endpoint] = 1
-        except quasardb.quasardb.Error as e:
+        except quasardb.Error as e:
             logger.error(f"[{endpoint}] Failed to put/get test entry '{key}': {e}")
         finally:
             try:
                 entry.remove()
-            except quasardb.quasardb.AliasNotFoundError:
+            except quasardb.AliasNotFoundError:
                 pass
-            except quasardb.quasardb.Error as e:
+            except quasardb.Error as e:
                 logger.error(f"[{endpoint}] Failed to clean up test entry '{key}': {e}")
 
     return ret
 
 
-def get_stats(*args, **kwargs):
+def get_critical_stats(*args, **kwargs):
+    """
+    Return the minimal set of cluster health metrics required for alerting.
+
+    These metrics (i.e., `check.online` and `node.writable`) are the ones that
+    feed CloudWatch alarms and signal conditions that require immediate action.
+    By contrast, high-volume or informational metrics (cache usage, RocksDB
+    internals, etc.) are non-critical because they are (usually) not part of the
+    alerting path.
+
+    Future extensions may allow users to define their own critical metrics.
+    """
+    logger.info("Getting critical stats")
     with get_qdb_conn(*args, **kwargs) as conn:
-        stats = qdbst.by_node(conn)
-        for endpoint, result in _check_node_writable(conn).items():
-            stats[endpoint]["cumulative"]["node.writable"] = {
-                "value": result,
+        ret = {endpoint: {"cumulative": {}} for endpoint in conn.endpoints()}
+        online_stats = _check_node_online(conn)
+        writable_stats = _check_node_writable(conn)
+
+        for endpoint in conn.endpoints():
+            ret[endpoint]["cumulative"]["check.online"] = {
+                "value": online_stats.get(endpoint, 0),
                 "type": qdbst.Type.GAUGE,
                 "unit": qdbst.Unit.NONE,
             }
-        return stats
+            ret[endpoint]["cumulative"]["node.writable"] = {
+                "value": writable_stats.get(endpoint, 0),
+                "type": qdbst.Type.GAUGE,
+                "unit": qdbst.Unit.NONE,
+            }
+
+        return ret
+
+
+def get_all_stats(*args, **kwargs):
+    logger.info("Getting all the stats")
+    with get_qdb_conn(*args, **kwargs) as conn:
+        ret = qdbst.by_node(conn)
+        return ret
 
 
 def _do_filter_metrics(metrics, fn):
@@ -103,6 +151,7 @@ def _do_filter(stats, fn):
 
 
 def filter_stats(stats, include=None, exclude=None):
+    logger.info("Filtering stats based on include/exclude filters")
     stats_ = copy.deepcopy(stats)
 
     if include is not None:

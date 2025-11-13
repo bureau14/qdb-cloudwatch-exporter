@@ -6,7 +6,7 @@ import pprint
 import pytest
 import quasardb
 
-from qdb_cloudwatch.check import get_stats
+from qdb_cloudwatch.check import get_all_stats
 
 pp = pprint.PrettyPrinter()
 
@@ -85,7 +85,7 @@ def qdbd_direct_connection(request):
 
 @pytest.fixture(scope="module")
 def stats(qdbd_settings):
-    return get_stats(
+    return get_all_stats(
         qdbd_settings.get("uri"),
         cluster_public_key=qdbd_settings.get("security").get("cluster_public_key_file"),
         user_security_file=qdbd_settings.get("security").get("user_private_key_file"),
