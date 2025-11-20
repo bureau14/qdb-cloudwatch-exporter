@@ -97,7 +97,9 @@ def get_critical_stats(*args, **kwargs):
     """
     logger.info("Getting critical stats")
     with get_qdb_conn(*args, **kwargs) as conn:
-        ret = {endpoint: {"cumulative": {}} for endpoint in conn.endpoints()}
+        ret = {
+            endpoint: {"cumulative": {}, "by_uid": {}} for endpoint in conn.endpoints()
+        }
         online_stats = _check_node_online(conn)
         writable_stats = _check_node_writable(conn)
 
