@@ -4,10 +4,9 @@ import logging
 import random
 import re
 import uuid
-
+from typing import Optional
 import quasardb
 import quasardb.stats as qdbst
-from quasardb import Cluster
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +22,11 @@ def _parse_user_security_file(x: str) -> tuple[str, str]:
         return (parsed["username"], parsed["secret_key"])
 
 
-def get_qdb_conn(uri: str, cluster_public_key:str=None, user_security_file:str=None) -> quasardb.Cluster:
+def get_qdb_conn(
+    uri: str,
+    cluster_public_key: Optional[str] = None,
+    user_security_file: Optional[str] = None,
+) -> quasardb.Cluster:
     logger.info("Getting qdb connection")
     if cluster_public_key and user_security_file:
         user, private_key = _parse_user_security_file(user_security_file)
@@ -56,7 +59,7 @@ def _check_node_online(conn) -> dict:
     return ret
 
 
-def _check_node_writable(conn:Cluster) -> dict | None:
+def _check_node_writable(conn: quasardb.Cluster) -> Optional[dict]:
     logger.info("Checking node writable")
     key = f"_qdb_write_check_{uuid.uuid4().hex}"  # almost zero chance of collision
     value = random.randint(-9223372036854775808, 9223372036854775807)
@@ -153,7 +156,7 @@ def _do_filter(stats: dict, fn) -> dict:
     return stats
 
 
-def filter_stats(stats:dict, include:list =None, exclude:list=None) -> dict:
+def filter_stats(stats: dict, include: list = None, exclude: list = None) -> dict:
     """
     Filter a statistics dictionary by metric name using include and/or exclude
     regular-expression patterns.

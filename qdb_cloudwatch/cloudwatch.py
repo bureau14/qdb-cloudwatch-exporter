@@ -47,7 +47,7 @@ def _to_metric(k, v) -> dict | None:
         return None
 
 
-def _qdb_to_cloudwatch(stats: dict) ->  list:
+def _qdb_to_cloudwatch(stats: dict) -> list:
     # We want to flatten all metrics into a tuple of 3 items:
     # - node_id
     # - user_id
