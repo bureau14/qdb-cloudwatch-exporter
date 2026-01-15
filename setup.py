@@ -12,6 +12,9 @@ setup(
     packages=["qdb_cloudwatch"],
     entry_points={"console_scripts": ["qdb-cloudwatch = qdb_cloudwatch.driver:main"]},
     version=version,
+    author="quasardb SAS",
+    author_email="support@quasar.ai",
+    url="https://quasar.ai/",
     description="Export QuasarDB statistics to AWS Cloudwatch",
     install_requires=["boto3>=1.9", "quasardb==3.14.3.dev0"],
     extras_require={
