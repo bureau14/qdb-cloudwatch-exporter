@@ -4,25 +4,29 @@ import logging
 import random
 import re
 import uuid
-
+from typing import Optional
 import quasardb
 import quasardb.stats as qdbst
 
 logger = logging.getLogger(__name__)
 
 
-def _slurp(x):
+def _slurp(x: str) -> str:
     with open(x, "r") as fp:
         return fp.read()
 
 
-def _parse_user_security_file(x):
+def _parse_user_security_file(x: str) -> tuple[str, str]:
     with open(x, "r") as fp:
         parsed = json.load(fp)
         return (parsed["username"], parsed["secret_key"])
 
 
-def get_qdb_conn(uri, cluster_public_key=None, user_security_file=None):
+def get_qdb_conn(
+    uri: str,
+    cluster_public_key: Optional[str] = None,
+    user_security_file: Optional[str] = None,
+) -> quasardb.Cluster:
     logger.info("Getting qdb connection")
     if cluster_public_key and user_security_file:
         user, private_key = _parse_user_security_file(user_security_file)
@@ -37,7 +41,7 @@ def get_qdb_conn(uri, cluster_public_key=None, user_security_file=None):
         return quasardb.Cluster(uri)
 
 
-def _check_node_online(conn):
+def _check_node_online(conn) -> dict:
     logger.info("Checking node online")
     ret = {}
 
@@ -55,7 +59,7 @@ def _check_node_online(conn):
     return ret
 
 
-def _check_node_writable(conn):
+def _check_node_writable(conn: quasardb.Cluster) -> Optional[dict]:
     logger.info("Checking node writable")
     key = f"_qdb_write_check_{uuid.uuid4().hex}"  # almost zero chance of collision
     value = random.randint(-9223372036854775808, 9223372036854775807)
@@ -83,7 +87,7 @@ def _check_node_writable(conn):
     return ret
 
 
-def get_critical_stats(*args, **kwargs):
+def get_critical_stats(*args, **kwargs) -> dict:
     """
     Return the minimal set of cluster health metrics required for alerting.
 
@@ -118,18 +122,18 @@ def get_critical_stats(*args, **kwargs):
         return ret
 
 
-def get_all_stats(*args, **kwargs):
+def get_all_stats(*args, **kwargs) -> dict:
     logger.info("Getting all the stats")
     with get_qdb_conn(*args, **kwargs) as conn:
         ret = qdbst.by_node(conn)
         return ret
 
 
-def _do_filter_metrics(metrics, fn):
+def _do_filter_metrics(metrics: list, fn) -> dict:
     return {key: metrics[key] for key in metrics if fn(key)}
 
 
-def _do_filter(stats, fn):
+def _do_filter(stats: dict, fn) -> dict:
     """
     Performs actual filtering of stats, keeping only those where fn(name) equals True
     """
@@ -152,7 +156,46 @@ def _do_filter(stats, fn):
     return stats
 
 
-def filter_stats(stats, include=None, exclude=None):
+def filter_stats(stats: dict, include: list = None, exclude: list = None) -> dict:
+    """
+    Filter a statistics dictionary by metric name using include and/or exclude
+    regular-expression patterns.
+
+    This function applies optional include and exclude filters to the keys
+    (metric names) in the provided ``stats`` dictionary. Filtering is performed
+    on a deep copy of the input to avoid mutating the original data.
+
+    Filtering behavior:
+    - If ``include`` is provided, only metrics whose names match **at least one**
+      regular-expression pattern in ``include`` are retained.
+    - If ``exclude`` is provided, metrics whose names match **any**
+      regular-expression pattern in ``exclude`` are removed.
+    - If both are provided, the include filter is applied first, followed by
+      the exclude filter.
+
+    Parameters
+    ----------
+    stats : dict
+        Dictionary of statistics keyed by metric name.
+    include : list[str], optional
+        List of regular-expression patterns. Metrics must match at least one
+        pattern to be included.
+    exclude : list[str], optional
+        List of regular-expression patterns. Metrics matching any pattern
+        will be excluded.
+
+    Returns
+    -------
+    dict
+        A new dictionary containing only the metrics that satisfy the
+        include/exclude criteria.
+
+    Notes
+    -----
+    - Regular expressions are evaluated using ``re.search``.
+    - The original ``stats`` dictionary is not modified.
+    """
+
     logger.info("Filtering stats based on include/exclude filters")
     stats_ = copy.deepcopy(stats)
 
