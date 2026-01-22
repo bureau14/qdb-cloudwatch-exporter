@@ -49,6 +49,12 @@ def get_args():
     )
 
     parser.add_argument(
+        "--endpoints",
+        dest="endpoints",
+        help="Comma-separated list of all expected cluster endpoints",
+    )
+
+    parser.add_argument(
         "--namespace",
         dest="namespace",
         help="Namespace for metrics",
@@ -71,6 +77,7 @@ def get_args():
 
     ret.filter_include = _parse_list(ret.filter_include)
     ret.filter_exclude = _parse_list(ret.filter_exclude)
+    ret.endpoints = _parse_list(ret.endpoints)
 
     if ret.filter_include is not None:
         logger.info(f"Using include filters: {ret.filter_include}")
@@ -88,6 +95,7 @@ def main():
 
     # Send critical stats first, as getting all stats is expensive when cluster is busy.
     critical_stats = get_critical_stats(
+        args.endpoints,
         args.cluster_uri,
         cluster_public_key=args.cluster_public_key,
         user_security_file=args.user_security_file,
