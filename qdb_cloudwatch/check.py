@@ -4,6 +4,7 @@ import logging
 import random
 import re
 import uuid
+from datetime import timedelta
 
 import quasardb
 import quasardb.stats as qdbst
@@ -22,7 +23,9 @@ def _parse_user_security_file(x):
         return (parsed["username"], parsed["secret_key"])
 
 
-def get_qdb_conn(uri, cluster_public_key=None, user_security_file=None):
+def get_qdb_conn(
+    uri, cluster_public_key=None, user_security_file=None, timeout_seconds=15
+):
     logger.info("Getting qdb connection")
     if cluster_public_key and user_security_file:
         user, private_key = _parse_user_security_file(user_security_file)
@@ -32,6 +35,7 @@ def get_qdb_conn(uri, cluster_public_key=None, user_security_file=None):
             user_name=user,
             user_private_key=private_key,
             cluster_public_key=public_key,
+            timeout=timedelta(seconds=timeout_seconds),
         )
     else:
         return quasardb.Cluster(uri)
@@ -83,9 +87,13 @@ def _check_node_writable(conn):
     return ret
 
 
-def get_critical_stats(*args, **kwargs):
+def get_critical_stats(endpoints, *args, **kwargs):
     """
     Return the minimal set of cluster health metrics required for alerting.
+
+    Explicitly passing the expected set of endpoints avoids relying on the live
+    cluster view, i.e. `conn.endpoints()`, which omits offline nodes and may
+    lead to incomplete health reports.
 
     These metrics (i.e., `check.online` and `node.writable`) are the ones that
     feed CloudWatch alarms and signal conditions that require immediate action.
@@ -96,26 +104,34 @@ def get_critical_stats(*args, **kwargs):
     Future extensions may allow users to define their own critical metrics.
     """
     logger.info("Getting critical stats")
-    with get_qdb_conn(*args, **kwargs) as conn:
-        ret = {
-            endpoint: {"cumulative": {}, "by_uid": {}} for endpoint in conn.endpoints()
+    ret = {endpoint: {"cumulative": {}, "by_uid": {}} for endpoint in endpoints}
+
+    online_stats = {}
+    writable_stats = {}
+    try:
+        with get_qdb_conn(*args, **kwargs) as conn:
+            online_stats = _check_node_online(conn)
+            writable_stats = _check_node_writable(conn)
+    except quasardb.Error as e:
+        # _check_node_* helpers do not raise quasardb errors.
+        # Any exception here means the qdb connection could not be established.
+        logger.error(
+            f"Failed to establish qdb connection, reporting endpoints as offline: {e}"
+        )
+
+    for endpoint in endpoints:
+        ret[endpoint]["cumulative"]["check.online"] = {
+            "value": online_stats.get(endpoint, 0),
+            "type": qdbst.Type.GAUGE,
+            "unit": qdbst.Unit.NONE,
         }
-        online_stats = _check_node_online(conn)
-        writable_stats = _check_node_writable(conn)
+        ret[endpoint]["cumulative"]["node.writable"] = {
+            "value": writable_stats.get(endpoint, 0),
+            "type": qdbst.Type.GAUGE,
+            "unit": qdbst.Unit.NONE,
+        }
 
-        for endpoint in conn.endpoints():
-            ret[endpoint]["cumulative"]["check.online"] = {
-                "value": online_stats.get(endpoint, 0),
-                "type": qdbst.Type.GAUGE,
-                "unit": qdbst.Unit.NONE,
-            }
-            ret[endpoint]["cumulative"]["node.writable"] = {
-                "value": writable_stats.get(endpoint, 0),
-                "type": qdbst.Type.GAUGE,
-                "unit": qdbst.Unit.NONE,
-            }
-
-        return ret
+    return ret
 
 
 def get_all_stats(*args, **kwargs):
