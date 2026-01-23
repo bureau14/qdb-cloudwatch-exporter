@@ -11,23 +11,7 @@
       <vcs-entry-ref root-id="Api_CloudwatchExporter_QdbCloudwatchExporter" />
     </vcs-settings>
     <artifact-dependencies>
-      <dependency id="ARTIFACT_DEPENDENCY_125" sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python310" cleanDestination="false">
-        <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="*" />
-      </dependency>
-      <dependency id="ARTIFACT_DEPENDENCY_282" sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python311" cleanDestination="false">
-        <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="*" />
-      </dependency>
-      <dependency id="ARTIFACT_DEPENDENCY_123" sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python39" cleanDestination="false">
-        <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="*" />
-      </dependency>
-      <dependency id="ARTIFACT_DEPENDENCY_119" sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python38" cleanDestination="false">
-        <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
-        <artifact sourcePath="*" />
-      </dependency>
-      <dependency id="ARTIFACT_DEPENDENCY_117" sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python37" cleanDestination="false">
+      <dependency id="ARTIFACT_DEPENDENCY_282" sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python313" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
         <artifact sourcePath="*" />
       </dependency>
@@ -45,13 +29,7 @@
           <option name="take-successful-builds-only" value="true" />
         </options>
       </depend-on>
-      <depend-on sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python310">
-        <options>
-          <option name="take-started-build-with-same-revisions" value="true" />
-          <option name="take-successful-builds-only" value="true" />
-        </options>
-      </depend-on>
-      <depend-on sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python311">
+      <depend-on sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python313">
         <options>
           <option name="take-started-build-with-same-revisions" value="true" />
           <option name="take-successful-builds-only" value="true" />

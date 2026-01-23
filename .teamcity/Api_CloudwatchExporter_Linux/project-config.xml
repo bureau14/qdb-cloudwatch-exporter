@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" parent-id="Api_CloudwatchExporter" uuid="149691ed-cd66-43ba-ae53-f4ffa5e9584e" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2025.3/project-config.xsd">
   <name>Linux</name>
-  <buildTypesOrder order="Api_CloudwatchExporter_Linux_Composite,Api_CloudwatchExporter_Linux_Python310,Api_CloudwatchExporter_Linux_Python37,Api_CloudwatchExporter_Linux_Python311,Api_CloudwatchExporter_Linux_Python39" />
+  <buildTypesOrder order="Api_CloudwatchExporter_Linux_Python37,Api_CloudwatchExporter_Linux_Python39,Api_CloudwatchExporter_Linux_Python313" />
 </project>
 

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <build-type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="b5f0118e-e6c1-47dc-8eee-49ec9ec6c4d5" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2025.3/project-config.xsd">
-  <name>Python 3.11</name>
+  <name>Python 3.13</name>
   <description />
   <settings ref="Api_CloudwatchExporter_Linux_Build">
     <parameters>
-      <param name="PYTHON_VERSION" value="3.11" spec="text description='Python version to use. Will be used as the base docker image, e.g. we will run the build inside the `python:%PYTHON_VERSION%` docker image.' label='Python version' validationMode='not_empty' display='normal'" />
+      <param name="PYTHON_VERSION" value="3.13" spec="text description='Python version to use. Will be used as the base docker image, e.g. we will run the build inside the `python:%PYTHON_VERSION%` docker image.' label='Python version' validationMode='not_empty' display='normal'" />
     </parameters>
     <build-extensions>
       <extension id="DockerSupport" type="DockerSupport">
@@ -15,13 +15,13 @@
       </extension>
     </build-extensions>
     <artifact-dependencies>
-      <dependency id="ARTIFACT_DEPENDENCY_126" sourceBuildTypeId="Api_Python_Release_Linux_X8664Core2_Python311" cleanDestination="false">
+      <dependency id="ARTIFACT_DEPENDENCY_126" sourceBuildTypeId="Api_Python_Release_Linux_X8664Core2_Python313" cleanDestination="false">
         <revisionRule name="sameChainOrLastFinished" revision="latest.sameChainOrLastFinished" />
         <artifact sourcePath="quasardb-*manylinux*.whl =&gt; ." />
       </dependency>
     </artifact-dependencies>
     <dependencies>
-      <depend-on sourceBuildTypeId="Api_Python_Release_Linux_X8664Core2_Python311">
+      <depend-on sourceBuildTypeId="Api_Python_Release_Linux_X8664Core2_Python313">
         <options>
           <option name="take-started-build-with-same-revisions" value="true" />
           <option name="take-successful-builds-only" value="true" />
