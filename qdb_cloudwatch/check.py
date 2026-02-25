@@ -24,12 +24,12 @@ def _parse_user_security_file(x):
 
 
 def get_qdb_conn(
-    uri, cluster_public_key=None, user_security_file=None, timeout_seconds=15
+    uri, cluster_public_key_file=None, user_security_file=None, timeout_seconds=15
 ):
     logger.info("Getting qdb connection")
-    if cluster_public_key and user_security_file:
+    if cluster_public_key_file and user_security_file:
         user, private_key = _parse_user_security_file(user_security_file)
-        public_key = _slurp(cluster_public_key)
+        public_key = _slurp(cluster_public_key_file)
         return quasardb.Cluster(
             uri,
             user_name=user,
@@ -41,59 +41,57 @@ def get_qdb_conn(
         return quasardb.Cluster(uri)
 
 
-def _check_node_online(conn):
-    logger.info("Checking node online")
-    ret = {}
+def _get_endpoint_from_uri(cluster_uri):
+    return cluster_uri[6:]  # remove the leading 'qdb://'
 
-    for endpoint in conn.endpoints():
-        ret[endpoint] = 0  # pessimistic
-        node = conn.node(endpoint)
-        entry = node.integer("$qdb.statistics.startup_epoch")  # entry always exists
 
-        try:
-            entry.get()
-            ret[endpoint] = 1
-        except quasardb.Error as e:
-            logger.error(f"[{endpoint}] Failed to read sample entry: {e}")
+def _check_node_online(conn, endpoint):
+    logger.info(f"Checking node online [{endpoint}]")
+
+    node = conn.node(endpoint)
+    entry = node.integer("$qdb.statistics.startup_epoch")  # entry always exists
+    ret = 0  # pessimistic
+
+    try:
+        entry.get()
+        ret = 1
+    except quasardb.Error as e:
+        logger.error(f"Failed to read sample entry: {e} [{endpoint}]")
 
     return ret
 
 
-def _check_node_writable(conn):
-    logger.info("Checking node writable")
+def _check_node_writable(conn, endpoint):
+    logger.info(f"Checking node writable [{endpoint}]")
+
     key = f"_qdb_write_check_{uuid.uuid4().hex}"  # almost zero chance of collision
     value = random.randint(-9223372036854775808, 9223372036854775807)
-    ret = {}
+    node = conn.node(endpoint)
+    entry = node.integer(key)
+    ret = 0  # pessimistic
 
-    for endpoint in conn.endpoints():
-        ret[endpoint] = 0  # pessimistic
-        node = conn.node(endpoint)
-        entry = node.integer(key)
-
+    try:
+        entry.put(value)
+        if entry.get() == value:
+            ret = 1
+    except quasardb.Error as e:
+        logger.error(f"Failed to put/get test entry '{key}': {e} [{endpoint}]")
+    finally:
         try:
-            entry.put(value)
-            if entry.get() == value:
-                ret[endpoint] = 1
+            entry.remove()
+        except quasardb.AliasNotFoundError:
+            pass
         except quasardb.Error as e:
-            logger.error(f"[{endpoint}] Failed to put/get test entry '{key}': {e}")
-        finally:
-            try:
-                entry.remove()
-            except quasardb.AliasNotFoundError:
-                pass
-            except quasardb.Error as e:
-                logger.error(f"[{endpoint}] Failed to clean up test entry '{key}': {e}")
+            logger.error(f"Failed to clean up test entry '{key}': {e} [{endpoint}]")
 
     return ret
 
 
-def get_critical_stats(endpoints, *args, **kwargs):
+def get_critical_stats(
+    cluster_uri, cluster_public_key_file=None, user_security_file=None
+):
     """
     Return the minimal set of cluster health metrics required for alerting.
-
-    Explicitly passing the expected set of endpoints avoids relying on the live
-    cluster view, i.e. `conn.endpoints()`, which omits offline nodes and may
-    lead to incomplete health reports.
 
     These metrics (i.e., `check.online` and `node.writable`) are the ones that
     feed CloudWatch alarms and signal conditions that require immediate action.
@@ -104,41 +102,48 @@ def get_critical_stats(endpoints, *args, **kwargs):
     Future extensions may allow users to define their own critical metrics.
     """
     logger.info("Getting critical stats")
-    ret = {endpoint: {"cumulative": {}, "by_uid": {}} for endpoint in endpoints}
 
-    online_stats = {}
-    writable_stats = {}
+    endpoint = _get_endpoint_from_uri(cluster_uri)
+    ret = {endpoint: {"cumulative": {}, "by_uid": {}}}
+    online = 0
+    writable = 0
+
     try:
-        with get_qdb_conn(*args, **kwargs) as conn:
-            online_stats = _check_node_online(conn)
-            writable_stats = _check_node_writable(conn)
+        with get_qdb_conn(
+            cluster_uri, cluster_public_key_file, user_security_file
+        ) as conn:
+            online = _check_node_online(conn, endpoint)
+            writable = _check_node_writable(conn, endpoint)
     except quasardb.Error as e:
         # _check_node_* helpers do not raise quasardb errors.
         # Any exception here means the qdb connection could not be established.
         logger.error(
-            f"Failed to establish qdb connection, reporting endpoints as offline: {e}"
+            f"Failed to establish qdb connection, reporting endpoint as offline: {e}"
         )
 
-    for endpoint in endpoints:
-        ret[endpoint]["cumulative"]["check.online"] = {
-            "value": online_stats.get(endpoint, 0),
-            "type": qdbst.Type.GAUGE,
-            "unit": qdbst.Unit.NONE,
-        }
-        ret[endpoint]["cumulative"]["node.writable"] = {
-            "value": writable_stats.get(endpoint, 0),
-            "type": qdbst.Type.GAUGE,
-            "unit": qdbst.Unit.NONE,
-        }
+    ret[endpoint]["cumulative"]["check.online"] = {
+        "value": online,
+        "type": qdbst.Type.GAUGE,
+        "unit": qdbst.Unit.NONE,
+    }
+    ret[endpoint]["cumulative"]["node.writable"] = {
+        "value": writable,
+        "type": qdbst.Type.GAUGE,
+        "unit": qdbst.Unit.NONE,
+    }
 
     return ret
 
 
-def get_all_stats(*args, **kwargs):
+def get_all_stats(cluster_uri, cluster_public_key_file=None, user_security_file=None):
     logger.info("Getting all the stats")
-    with get_qdb_conn(*args, **kwargs) as conn:
-        ret = qdbst.by_node(conn)
-        return ret
+
+    with get_qdb_conn(cluster_uri, cluster_public_key_file, user_security_file) as conn:
+        endpoint = _get_endpoint_from_uri(cluster_uri)
+        node = conn.node(endpoint)
+        stats = qdbst.of_node(node)
+
+        return {endpoint: stats}
 
 
 def _do_filter_metrics(metrics, fn):
