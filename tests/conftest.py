@@ -35,7 +35,7 @@ def _qdbd_settings():
             "user_name": user_key["username"],
             "user_private_key": user_key["secret_key"],
             "cluster_public_key": cluster_key,
-            "user_private_key_file": "user_private.key",
+            "user_security_file": "user_private.key",
             "cluster_public_key_file": "cluster_public.key",
         },
     }
@@ -87,6 +87,6 @@ def qdbd_direct_connection(request):
 def stats(qdbd_settings):
     return get_all_stats(
         qdbd_settings.get("uri"),
-        cluster_public_key=qdbd_settings.get("security").get("cluster_public_key_file"),
-        user_security_file=qdbd_settings.get("security").get("user_private_key_file"),
+        qdbd_settings.get("security").get("cluster_public_key_file"),
+        qdbd_settings.get("security").get("user_security_file"),
     )
