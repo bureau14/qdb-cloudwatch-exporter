@@ -146,3 +146,6 @@ insecure/
 secure/
 user_private.key
 users.cfg
+
+# MacOS
+.DS_Store

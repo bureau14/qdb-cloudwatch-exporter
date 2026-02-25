@@ -89,15 +89,15 @@ def main():
     # Send critical stats first, as getting all stats is expensive when cluster is busy.
     critical_stats = get_critical_stats(
         args.cluster_uri,
-        cluster_public_key=args.cluster_public_key,
-        user_security_file=args.user_security_file,
+        args.cluster_public_key,
+        args.user_security_file,
     )
     push_stats(critical_stats, args.namespace)
 
     stats = get_all_stats(
         args.cluster_uri,
-        cluster_public_key=args.cluster_public_key,
-        user_security_file=args.user_security_file,
+        args.cluster_public_key,
+        args.user_security_file,
     )
     stats = filter_stats(
         stats, include=args.filter_include, exclude=args.filter_exclude
