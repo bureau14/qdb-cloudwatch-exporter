@@ -87,6 +87,6 @@ def qdbd_direct_connection(request):
 def stats(qdbd_settings):
     return get_all_stats(
         qdbd_settings.get("uri"),
-        cluster_public_key_file=qdbd_settings.get("security").get("cluster_public_key_file"),
-        user_security_file=qdbd_settings.get("security").get("user_security_file"),
+        qdbd_settings.get("security").get("cluster_public_key_file"),
+        qdbd_settings.get("security").get("user_security_file"),
     )
