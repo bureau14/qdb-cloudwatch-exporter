@@ -16,7 +16,7 @@ setup(
     author_email="support@quasar.ai",
     url="https://quasar.ai/",
     description="Export QuasarDB statistics to AWS Cloudwatch",
-    install_requires=["boto3>=1.9", "quasardb==3.14.3.dev0"],
+    install_requires=["boto3>=1.9", "quasardb"],
     extras_require={
         "pandas": ["pandas"],
         "tests": [
