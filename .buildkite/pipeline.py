@@ -109,7 +109,7 @@ def generate_pipeline() -> Pipeline:
                 slug = p.slug(bt.lower(), f"py{py.replace('.', '')}")
 
                 # We want to use Release QuasarDB binaries when building Python API (debug and release)
-                dependency_slug = p.slug("release")
+                dependency_slug = p.slug("release", f"py{py.replace('.', '')})
 
                 tvars = {
                     "slug": slug,
@@ -122,7 +122,7 @@ def generate_pipeline() -> Pipeline:
                     "promote": {"variant": slug, "git-ref": git_ref},
                     "download": {
                         "variant": dependency_slug,
-                        "git-ref": git_ref,
+                        "git-ref": "refs/heads/sc-18913/buildkite-add-python-api-pipeline", # TODO remove hardcoded git-ref before merge
                     },
                 }
 
