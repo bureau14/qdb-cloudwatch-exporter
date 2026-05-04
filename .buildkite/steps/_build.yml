@@ -25,7 +25,6 @@ plugins:
         projects:
           - project_id: "qdb-api-python"
             output-dir: "qdb"
-            extract: true
             files:
               - "dist/quasardb-*.whl"
             variant: linux-core2-release-py314
