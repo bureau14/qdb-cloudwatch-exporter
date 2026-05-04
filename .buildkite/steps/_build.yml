@@ -27,7 +27,7 @@ plugins:
             output-dir: "qdb"
             extract: true
             files:
-              - "quasardb-*.whl"
+              - "dist/quasardb-*.whl"
             variant: linux-core2-release-py314
             git-ref: "refs/heads/sc-18913/buildkite-add-python-api-pipeline" # TODO remove hardcoded git-ref before merge
           - project_id: "quasardb"
