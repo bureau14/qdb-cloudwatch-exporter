@@ -1,0 +1,33 @@
+agents:
+  queue: "default-{queue}"
+
+# retry:
+#   automatic:
+#       limit: 3
+
+label: "{name} ({slug})"
+key: "build-{slug}"
+
+commands:
+  - echo \"+++ Start Services\"
+  - bash scripts/tests/setup/start-services.sh
+  - echo \"+++ Run Tests\"
+  - bash scripts/cicd/10.test.sh
+  - echo \"+++ Stop Services\"
+  - bash scripts/tests/setup/stop-services.sh
+  - echo \"+++ Run build\"
+  - bash scripts/cicd/20.build.sh
+
+plugins:
+  - bureau14/qdb-artifacts#master:
+      download:
+        project_id: "qdb-api-python"
+        output-dir: "qdb"
+        extract: true
+        clean: true
+        files:
+          - "quasardb-*.whl"
+      upload:
+        files:
+          - "dist/qdb_cloudwatch-*.whl"
+      promote: {}
