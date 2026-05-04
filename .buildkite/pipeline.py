@@ -46,7 +46,7 @@ BUILD_TYPES = ["Release"]
 
 # We only test latest Python and the minimum supported version
 PYTHON_VERSIONS = [
-    "3.9",
+    # "3.9",
     "3.14",
 ]
 
@@ -109,7 +109,7 @@ def generate_pipeline() -> Pipeline:
                 slug = p.slug(bt.lower(), f"py{py.replace('.', '')}")
 
                 # We want to use Release QuasarDB binaries when building Python API (debug and release)
-                dependency_slug = p.slug("release", f"py{py.replace('.', '')})
+                dependency_slug = p.slug("release", f"py{py.replace('.', '')}")
 
                 tvars = {
                     "slug": slug,
@@ -118,12 +118,15 @@ def generate_pipeline() -> Pipeline:
                 }
 
                 artifact_vars_per_step = {
-                    "upload": {"variant": slug, "git-ref": git_ref},
-                    "promote": {"variant": slug, "git-ref": git_ref},
-                    "download": {
-                        "variant": dependency_slug,
-                        "git-ref": "refs/heads/sc-18913/buildkite-add-python-api-pipeline", # TODO remove hardcoded git-ref before merge
+                    "upload": {
+                        "variant": slug,
+                        "git-ref": git_ref
                     },
+                    "promote": {"variant": slug, "git-ref": git_ref},
+                    # "download": {
+                    #      "git-ref": git_ref,
+                    #      "variant": dependency_slug
+                    # },
                 }
 
                 compose_config = {
@@ -133,7 +136,7 @@ def generate_pipeline() -> Pipeline:
                 }
 
                 step = load_template(STEPS_DIR / "_build.yml", **tvars)
-                env = _env(p, "test", bt)
+                env = _env(p, "build", bt)
                 env.update(step.get("env") or {})
                 env.update({"PYTHON_VERSION": py})
                 env.update(_get_agent_python_env(p, py))

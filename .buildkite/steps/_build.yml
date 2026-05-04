@@ -19,14 +19,26 @@ commands:
   - bash scripts/cicd/20.build.sh
 
 plugins:
-  - bureau14/qdb-artifacts#master:
+  - bureau14/qdb-artifacts#download-from-multiple-projects:
       download:
-        project_id: "qdb-api-python"
-        output-dir: "qdb"
-        extract: true
         clean: true
-        files:
-          - "quasardb-*.whl"
+        projects:
+          - project_id: "qdb-api-python"
+            output-dir: "qdb"
+            extract: true
+            files:
+              - "quasardb-*.whl"
+            variant: linux-amd64-core2-release-py314
+            git-ref: "refs/heads/sc-18913/buildkite-add-python-api-pipeline" # TODO remove hardcoded git-ref before merge
+          - project_id: "quasardb"
+            variant: linux-amd64-core2-release
+            output-dir: "qdb"
+            extract: true
+            files:
+              - "*-c-api.tar.zst!*"
+              - "*-server.tar.zst!*"
+              - "*-utils.tar.zst!*"
+            git-ref: "refs/heads/sc-18547/buildkite" # TODO remove hardcoded git-ref before merge
       upload:
         files:
           - "dist/qdb_cloudwatch-*.whl"
