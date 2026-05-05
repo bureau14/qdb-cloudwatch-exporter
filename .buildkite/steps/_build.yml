@@ -9,8 +9,6 @@ commands:
   - bash scripts/tests/setup/start-services.sh
   - echo \"+++ Run Tests\"
   - bash scripts/cicd/10.test.sh
-  - echo \"+++ Stop Services\"
-  - bash scripts/tests/setup/stop-services.sh
   - echo \"+++ Run build\"
   - bash scripts/cicd/20.build.sh
 
