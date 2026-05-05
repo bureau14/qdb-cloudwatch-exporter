@@ -109,7 +109,8 @@ def generate_pipeline() -> Pipeline:
                 slug = p.slug(bt.lower(), f"py{py.replace('.', '')}")
 
                 # We want to use Release QuasarDB binaries when building Python API (debug and release)
-                dependency_slug = p.slug("release", f"py{py.replace('.', '')}")
+                py_dependency_slug = p.slug("release", f"py{py.replace('.', '')}")
+                qdb_dependency_slug = p.slug("release")
 
                 tvars = {
                     "slug": slug,
@@ -123,10 +124,18 @@ def generate_pipeline() -> Pipeline:
                         "git-ref": git_ref
                     },
                     "promote": {"variant": slug, "git-ref": git_ref},
-                    # "download": {
-                    #      "git-ref": git_ref,
-                    #      "variant": dependency_slug
-                    # },
+                    "download": {
+                        "by_project": {
+                            "qdb-api-python": {
+                                "variant": py_dependency_slug,
+                                "git-ref": "refs/heads/sc-18913/buildkite-add-python-api-pipeline"  # TODO remove before merge
+                            },
+                            "quasardb-build": {
+                                "variant": qdb_dependency_slug,
+                                "git-ref": "refs/heads/buildkite-update-plugin" # TODO remove before merge
+                            }
+                        }
+                    }
                 }
 
                 compose_config = {
