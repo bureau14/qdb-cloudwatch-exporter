@@ -1,10 +1,6 @@
 agents:
   queue: "default-{queue}"
 
-# retry:
-#   automatic:
-#       limit: 3
-
 label: "{name} ({slug})"
 key: "build-{slug}"
 
@@ -19,7 +15,7 @@ commands:
   - bash scripts/cicd/20.build.sh
 
 plugins:
-  - bureau14/qdb-artifacts#download-from-multiple-projects:
+  - bureau14/qdb-artifacts#master:
       download:
         clean: true
         projects:
