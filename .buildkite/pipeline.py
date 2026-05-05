@@ -79,24 +79,6 @@ def _env(p: Platform, step_name: str, build_type: str) -> dict[str, str]:
     )
 
 
-def _get_agent_python_env(platform: Platform, python_version: str) -> dict[str, str]:
-    """
-    Returns environment variables to set for Python executable on the agent, based on platform and python version.
-    Applies to Windows and macOS where we have multiple Python versions installed in different locations.
-    """
-    python_version_slug = python_version.replace(".", "")
-    if platform.os == "windows":
-        return {
-            "PYTHON_EXECUTABLE": f"$$QDB_CICD_AGENT_PYTHON_{python_version_slug}_64_EXE",
-            "PYTHON_CMD": f"$$QDB_CICD_AGENT_PYTHON_{python_version_slug}_64_EXE",
-        }
-    elif platform.os == "macos":
-        return {
-            "PYTHON_EXECUTABLE": f"$$QDB_CICD_AGENT_PYTHON_{python_version_slug}_PATH",
-        }
-    return {}
-
-
 def generate_pipeline() -> Pipeline:
     """Load templates, expand across platforms × build_types, overlay env and docker."""
     pipeline = Pipeline()
@@ -119,23 +101,20 @@ def generate_pipeline() -> Pipeline:
                 }
 
                 artifact_vars_per_step = {
-                    "upload": {
-                        "variant": slug,
-                        "git-ref": git_ref
-                    },
+                    "upload": {"variant": slug, "git-ref": git_ref},
                     "promote": {"variant": slug, "git-ref": git_ref},
                     "download": {
                         "by_project": {
                             "qdb-api-python": {
                                 "variant": py_dependency_slug,
-                                "git-ref": "refs/heads/sc-18913/buildkite-add-python-api-pipeline"  # TODO remove before merge
+                                "git-ref": git_ref,
                             },
                             "quasardb-build": {
                                 "variant": qdb_dependency_slug,
-                                "git-ref": "refs/heads/buildkite-update-plugin" # TODO remove before merge
-                            }
+                                "git-ref": git_ref,
+                            },
                         }
-                    }
+                    },
                 }
 
                 compose_config = {
@@ -148,7 +127,6 @@ def generate_pipeline() -> Pipeline:
                 env = _env(p, "build", bt)
                 env.update(step.get("env") or {})
                 env.update({"PYTHON_VERSION": py})
-                env.update(_get_agent_python_env(p, py))
                 step["env"] = env
                 if p.os == "linux":
                     apply_docker_compose(step, config=compose_config)
