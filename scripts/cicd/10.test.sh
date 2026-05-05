@@ -20,7 +20,4 @@ then
     TEST_OPTS+=" --junitxml=${JUNIT_XML_FILE}"
 fi
 
-pushd tests
-exec ${PYTHON} -m pytest ${TEST_OPTS}
-popd
-
+${PYTHON} -m pytest ${TEST_OPTS}

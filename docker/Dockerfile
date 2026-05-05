@@ -11,7 +11,7 @@ ARG HOME=/home/${USERNAME}
 ARG COMMENT=builder
 
 # Install packages required for running start-services inside the container
-RUN apt-get update && apt-get install -y lsof
+RUN apt-get update && apt-get install -y lsof procps
 
 RUN groupadd --gid $GROUP_ID $USERNAME
 RUN useradd --comment "$COMMENT" --home-dir $HOME --create-home --system --uid $USER_ID --gid $GROUP_ID $USERNAME
