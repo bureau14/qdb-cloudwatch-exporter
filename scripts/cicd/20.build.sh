@@ -16,7 +16,7 @@ fi
 
 ${PYTHON} -m pip install --upgrade -r dev-requirements.txt
 
-${PYTHON} -m pip install --force-reinstall qdb/quasardb-*.whl
+${PYTHON} -m pip install --force-reinstall qdb/dist/quasardb-*.whl
 
 echo "Building wheel"
 

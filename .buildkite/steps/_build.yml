@@ -34,7 +34,6 @@ plugins:
             output-dir: "qdb"
             extract: true
             files:
-              - "*-c-api.tar.zst!*"
               - "*-server.tar.zst!*"
               - "*-utils.tar.zst!*"
             git-ref: "refs/heads/sc-18547/buildkite" # TODO remove hardcoded git-ref before merge
