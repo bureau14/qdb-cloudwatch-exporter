@@ -46,7 +46,7 @@ BUILD_TYPES = ["Release"]
 
 # We only test latest Python and the minimum supported version
 PYTHON_VERSIONS = [
-    # "3.9",
+    "3.9",
     "3.14",
 ]
 
