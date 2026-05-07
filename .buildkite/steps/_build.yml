@@ -20,7 +20,7 @@ plugins:
           - project_id: "qdb-api-python"
             output-dir: "qdb"
             files:
-              - "dist/quasardb-*.whl"
+              - "quasardb-*.whl"
           - project_id: "quasardb-build"
             variant: linux-core2-release
             output-dir: "qdb"
@@ -31,4 +31,5 @@ plugins:
       upload:
         files:
           - "dist/qdb_cloudwatch-*.whl"
+        base_dir: "dist"
       promote: {}
