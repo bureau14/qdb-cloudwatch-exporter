@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Buildkite dynamic pipeline generator for qdb-api-python.
+"""Buildkite dynamic pipeline generator for qdb-cloudwatch-exporter.
 
 Step templates in steps/*.yml define nearly-complete Buildkite steps with
 {placeholder} variables.  This script loads them, substitutes variables, and
@@ -52,7 +52,6 @@ PYTHON_VERSIONS = [
 
 # Environment variable layering: global → step → os → os+step → platform compilers.
 GLOBAL_ENV: dict[str, str] = {
-    "AWS_DEFAULT_REGION": "eu-west-1",
     "JUNIT_XML_FILE": "tests/pytest.xml",
     "QDB_ENCRYPT_TRAFFIC": "1",
 }
