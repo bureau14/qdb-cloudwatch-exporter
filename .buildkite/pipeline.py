@@ -15,7 +15,7 @@ import dataclasses
 import sys
 from pathlib import Path
 
-from buildkite_sdk import Pipeline, GroupStep
+from buildkite_sdk import CommandStep, Pipeline, GroupStep
 
 sys.path.insert(0, str(Path(__file__).parent / "tools"))
 from qdb_pipeline import (
@@ -53,7 +53,7 @@ PYTHON_VERSIONS = [
 # Environment variable layering: global → step → os → os+step → platform compilers.
 GLOBAL_ENV: dict[str, str] = {
     "AWS_DEFAULT_REGION": "eu-west-1",
-    "JUNIT_XML_FILE": "build/test/pytest.xml",
+    "JUNIT_XML_FILE": "tests/pytest.xml",
     "QDB_ENCRYPT_TRAFFIC": "1",
 }
 
@@ -84,11 +84,13 @@ def generate_pipeline() -> Pipeline:
     pipeline = Pipeline()
     git_ref = get_git_ref()
     group_steps = {}
+    jobs = []
 
     for p in PLATFORMS:
         for bt in BUILD_TYPES:
             for py in PYTHON_VERSIONS:
                 slug = p.slug(bt.lower(), f"py{py.replace('.', '')}")
+                jobs.append(f"build-{slug}")
 
                 # We want to use Release QuasarDB binaries when building Python API (debug and release)
                 py_dependency_slug = p.slug("release", f"py{py.replace('.', '')}")
@@ -142,6 +144,10 @@ def generate_pipeline() -> Pipeline:
     for group, steps in group_steps.items():
         group_step = GroupStep(group=group, steps=steps)
         pipeline.add_step(group_step)
+    
+    step = load_template(STEPS_DIR / "_test_report.yml")
+    step["depends_on"] = jobs
+    pipeline.add_step(CommandStep.from_dict(step))
 
     return pipeline
 

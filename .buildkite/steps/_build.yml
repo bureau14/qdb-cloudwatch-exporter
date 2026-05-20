@@ -33,3 +33,9 @@ plugins:
           - "dist/qdb_cloudwatch-*.whl"
         base_dir: "dist"
       promote: {}
+  - bureau14/qdb-test-report#master:
+      title: "Test report {slug}"
+      job:
+        variant: {slug}
+        junit_input_path: "tests/pytest.xml"
+      
