@@ -34,6 +34,8 @@ STEPS_DIR = Path(__file__).parent / "steps"
 # Quasardb-specific toolchain overlays on top of shared infrastructure platforms.
 _LINUX = dict()
 
+# Unlike Python API build, resulting artifacts are not platform-specific, so we don't need to test every Python version on every platform.
+# Instead, lets test the oldest and the latest supported versions of Python and stick to linux.
 _OS_OVERLAY = {"linux": _LINUX}
 PLATFORMS: list[Platform] = [
     dataclasses.replace(p, **_OS_OVERLAY.get(p.os, {}))
@@ -44,7 +46,6 @@ PLATFORMS: list[Platform] = [
 
 BUILD_TYPES = ["Release"]
 
-# We only test latest Python and the minimum supported version
 PYTHON_VERSIONS = [
     "3.9",
     "3.14",
@@ -91,7 +92,6 @@ def generate_pipeline() -> Pipeline:
                 slug = p.slug(bt.lower(), f"py{py.replace('.', '')}")
                 jobs.append(f"build-{slug}")
 
-                # We want to use Release QuasarDB binaries when building Python API (debug and release)
                 py_dependency_slug = p.slug("release", f"py{py.replace('.', '')}")
                 qdb_dependency_slug = p.slug("release")
 

@@ -1,4 +1,4 @@
 setuptools==82.0.1
 pytest==8.4.2
 teamcity-messages==1.33
-wheel == 0.47.0
+wheel==0.47.0
