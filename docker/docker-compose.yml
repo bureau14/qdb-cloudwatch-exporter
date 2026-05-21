@@ -1,0 +1,10 @@
+services:
+  python-build:
+     build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PYTHON_VERSION=${PYTHON_VERSION}
+     volumes:
+      - ../:/workdir
+     working_dir: /workdir

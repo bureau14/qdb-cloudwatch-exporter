@@ -1,0 +1,41 @@
+agents:
+  queue: "default-{queue}"
+
+label: "{name} ({slug})"
+key: "build-{slug}"
+
+commands:
+  - echo \"+++ Start Services\"
+  - bash scripts/tests/setup/start-services.sh
+  - echo \"+++ Run Tests\"
+  - bash scripts/cicd/10.test.sh
+  - echo \"+++ Run build\"
+  - bash scripts/cicd/20.build.sh
+
+plugins:
+  - bureau14/qdb-artifacts#master:
+      download:
+        clean: true
+        projects:
+          - project_id: "qdb-api-python"
+            output-dir: "qdb"
+            files:
+              - "quasardb-*.whl"
+          - project_id: "quasardb-build"
+            variant: linux-core2-release
+            output-dir: "qdb"
+            extract: true
+            files:
+              - "*-server.tar.zst!*"
+              - "*-utils.tar.zst!*"
+      upload:
+        files:
+          - "dist/qdb_cloudwatch-*.whl"
+        base_dir: "dist"
+      promote: {}
+  - bureau14/qdb-test-report#master:
+      title: "Test report {slug}"
+      job:
+        variant: {slug}
+        junit_input_path: "tests/pytest.xml"
+      
