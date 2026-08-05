@@ -17,12 +17,12 @@
       </dependency>
     </artifact-dependencies>
     <dependencies>
-      <depend-on sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python37">
+      <!-- <depend-on sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python37">
         <options>
           <option name="take-started-build-with-same-revisions" value="true" />
           <option name="take-successful-builds-only" value="true" />
         </options>
-      </depend-on>
+      </depend-on> -->
       <depend-on sourceBuildTypeId="Api_CloudwatchExporter_Linux_Python39">
         <options>
           <option name="take-started-build-with-same-revisions" value="true" />
