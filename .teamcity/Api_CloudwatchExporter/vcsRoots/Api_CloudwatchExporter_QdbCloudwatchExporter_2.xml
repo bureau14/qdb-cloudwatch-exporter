@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vcs-root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="b5f7f395-2b51-4d43-9ae6-1cd65b9b4570" type="jetbrains.git" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2025.3/project-config.xsd">
+  <name>qdb-cloudwatch-exporter</name>
+  <param name="agentCleanFilesPolicy" value="ALL_UNTRACKED" />
+  <param name="agentCleanPolicy" value="ALWAYS" />
+  <param name="authMethod" value="PASSWORD" />
+  <param name="branch" value="refs/heads/master" />
+  <param name="ignoreKnownHosts" value="true" />
+  <param name="reportTagRevisions" value="true" />
+  <param name="secure:password" value="credentialsJSON:34649ff7-dbc0-4b81-9401-5da2c0db85bc" />
+  <param name="submoduleCheckout" value="CHECKOUT" />
+  <param name="teamcity:branchSpec"><![CDATA[+:refs/heads/*
++:refs/tags/*]]></param>
+  <param name="url" value="https://github.com/bureau14/qdb-cloudwatch-exporter" />
+  <param name="useAlternates" value="AUTO" />
+  <param name="username" value="solatis" />
+  <param name="usernameStyle" value="NAME" />
+</vcs-root>
+
