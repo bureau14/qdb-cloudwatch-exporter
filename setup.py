@@ -5,7 +5,7 @@
 from setuptools import setup
 
 # Should equal quasardb api version
-version = "3.14.3.dev0"
+version = "3.14.3"
 
 setup(
     name="qdb-cloudwatch",
@@ -16,7 +16,7 @@ setup(
     author_email="support@quasar.ai",
     url="https://quasar.ai/",
     description="Export QuasarDB statistics to AWS Cloudwatch",
-    install_requires=["boto3>=1.9", "quasardb"],
+    install_requires=["boto3>=1.9", "quasardb==3.14.3"],
     extras_require={
         "pandas": ["pandas"],
         "tests": [
