@@ -2,7 +2,7 @@ agents:
   queue: "default-{queue}"
 
 label: "{name} ({slug})"
-key: "build-{slug}"
+step_id: build
 
 commands:
   - echo \"+++ Start Services\"
@@ -18,10 +18,12 @@ plugins:
         clean: true
         projects:
           - project_id: "qdb-api-python"
+            step: build
             output-dir: "qdb"
             files:
               - "quasardb-*.whl"
           - project_id: "quasardb-build"
+            step: build
             variant: linux-core2-release
             output-dir: "qdb"
             extract: true
